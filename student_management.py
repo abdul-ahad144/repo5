@@ -2,17 +2,25 @@ import streamlit as st
 import pandas as pd
 import os
 
+# ---------------------------------------------------
+# SAME FILE USED BY DASHBOARD
+# ---------------------------------------------------
+
 FILE = "students.csv"
 
 
 # ---------------------------------------------------
 # LOAD STUDENTS
 # ---------------------------------------------------
+
 def load_students():
+
+    # CREATE FILE IF NOT EXISTS
 
     if not os.path.exists(FILE):
 
         df = pd.DataFrame(columns=[
+
             "Student_ID",
             "Name",
             "CGPA",
@@ -21,7 +29,15 @@ def load_students():
             "Company_Tier",
             "Skill_Programs",
             "Projects",
-            "Internships"
+            "Internships",
+            "Applied",
+            "Shortlisted",
+            "Interview_Attended",
+            "Offer_Received",
+            "Joined",
+            "Salary_LPA",
+            "Failed_Stage"
+
         ])
 
         df.to_csv(FILE, index=False)
@@ -32,6 +48,7 @@ def load_students():
 # ---------------------------------------------------
 # SAVE STUDENTS
 # ---------------------------------------------------
+
 def save_students(df):
 
     df.to_csv(FILE, index=False)
@@ -40,52 +57,14 @@ def save_students(df):
 # ---------------------------------------------------
 # MAIN PAGE
 # ---------------------------------------------------
+
 def student_management_page():
 
+    st.title("🎓 Student Management System")
+
     # ---------------------------------------------------
-    # PAGE STYLE
+    # LOAD DATA
     # ---------------------------------------------------
-
-    st.markdown("""
-    <style>
-
-    .stApp {
-        background: linear-gradient(135deg, #edf2fb, #d7e3fc);
-    }
-
-    .main-title {
-        text-align:center;
-        font-size:40px;
-        font-weight:bold;
-        color:#0f172a;
-        margin-bottom:20px;
-    }
-
-    .section-box {
-        background:white;
-        padding:25px;
-        border-radius:15px;
-        box-shadow:0px 0px 15px rgba(0,0,0,0.08);
-        margin-bottom:20px;
-    }
-
-    .stButton button {
-        width:100%;
-        background:#0f172a;
-        color:white;
-        border:none;
-        border-radius:10px;
-        padding:12px;
-        font-weight:bold;
-    }
-
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown(
-        "<div class='main-title'>🎓 Student Management System</div>",
-        unsafe_allow_html=True
-    )
 
     df = load_students()
 
@@ -100,6 +79,7 @@ def student_management_page():
         if st.button("⬅ Back To Dashboard"):
 
             st.session_state.page = "dashboard"
+
             st.rerun()
 
     with col2:
@@ -107,7 +87,9 @@ def student_management_page():
         if st.button("🚪 Logout"):
 
             st.session_state.logged_in = False
+
             st.session_state.page = "landing"
+
             st.rerun()
 
     st.markdown("---")
@@ -116,11 +98,13 @@ def student_management_page():
     # ADD STUDENT
     # ===================================================
 
-    st.markdown("<div class='section-box'>", unsafe_allow_html=True)
-
-    st.subheader("➕ Add New Student")
+    st.subheader("➕ Add Student")
 
     col1, col2 = st.columns(2)
+
+    # ---------------------------------------------------
+    # LEFT SIDE
+    # ---------------------------------------------------
 
     with col1:
 
@@ -137,32 +121,56 @@ def student_management_page():
         )
 
         domain = st.selectbox(
+
             "Domain",
+
             [
                 "AI",
                 "Web Development",
                 "Cloud Computing",
                 "Cyber Security",
-                "Data Science",
-                "Machine Learning"
+                "Data Science"
             ]
         )
+
+        applied = st.selectbox(
+            "Applied",
+            [0, 1]
+        )
+
+        shortlisted = st.selectbox(
+            "Shortlisted",
+            [0, 1]
+        )
+
+        interview = st.selectbox(
+            "Interview Attended",
+            [0, 1]
+        )
+
+    # ---------------------------------------------------
+    # RIGHT SIDE
+    # ---------------------------------------------------
 
     with col2:
 
         role = st.selectbox(
+
             "Job Role",
+
             [
-                "Software Developer",
-                "Data Analyst",
                 "ML Engineer",
+                "Software Developer",
                 "Cloud Engineer",
-                "Tester"
+                "Tester",
+                "Data Analyst"
             ]
         )
 
         company = st.selectbox(
+
             "Company Tier",
+
             [
                 "Tier 1",
                 "Tier 2",
@@ -170,11 +178,58 @@ def student_management_page():
             ]
         )
 
-        skills = st.slider("Skill Programs", 0, 10, 2)
+        skills = st.slider(
+            "Skill Programs",
+            0,
+            10,
+            2
+        )
 
-        projects = st.slider("Projects", 0, 10, 2)
+        projects = st.slider(
+            "Projects",
+            0,
+            10,
+            2
+        )
 
-        internships = st.slider("Internships", 0, 5, 1)
+        internships = st.slider(
+            "Internships",
+            0,
+            5,
+            1
+        )
+
+        offer = st.selectbox(
+            "Offer Received",
+            [0, 1]
+        )
+
+        joined = st.selectbox(
+            "Joined",
+            [0, 1]
+        )
+
+        salary = st.number_input(
+            "Salary LPA",
+            min_value=0,
+            max_value=100,
+            value=5
+        )
+
+        failed_stage = st.selectbox(
+
+            "Failed Stage",
+
+            [
+                "None",
+                "Aptitude",
+                "Shortlisting",
+                "Interview",
+                "Technical Round",
+                "Coding Round",
+                "HR Round"
+            ]
+        )
 
     # ---------------------------------------------------
     # ADD BUTTON
@@ -204,29 +259,49 @@ def student_management_page():
                 "Company_Tier": company,
                 "Skill_Programs": skills,
                 "Projects": projects,
-                "Internships": internships
+                "Internships": internships,
+                "Applied": applied,
+                "Shortlisted": shortlisted,
+                "Interview_Attended": interview,
+                "Offer_Received": offer,
+                "Joined": joined,
+                "Salary_LPA": salary,
+                "Failed_Stage": failed_stage
 
             }])
 
-            df = pd.concat([df, new_student], ignore_index=True)
+            # ---------------------------------------------------
+            # ADD TO SAME CSV
+            # ---------------------------------------------------
+
+            df = pd.concat(
+                [df, new_student],
+                ignore_index=True
+            )
+
+            # ---------------------------------------------------
+            # SAVE
+            # ---------------------------------------------------
 
             save_students(df)
 
-            st.success("Student Added Successfully ✅")
+            st.success(
+                "Student Added Successfully ✅"
+            )
 
             st.rerun()
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("---")
 
     # ===================================================
     # REMOVE STUDENT
     # ===================================================
 
-    st.markdown("<div class='section-box'>", unsafe_allow_html=True)
-
     st.subheader("❌ Remove Student")
 
-    remove_id = st.text_input("Enter Student ID To Remove")
+    remove_id = st.text_input(
+        "Enter Student ID To Remove"
+    )
 
     if st.button("🗑 REMOVE STUDENT"):
 
@@ -234,11 +309,23 @@ def student_management_page():
 
         if remove_id in df["Student_ID"].astype(str).values:
 
-            df = df[df["Student_ID"].astype(str) != remove_id]
+            # ---------------------------------------------------
+            # REMOVE
+            # ---------------------------------------------------
+
+            df = df[
+                df["Student_ID"].astype(str) != remove_id
+            ]
+
+            # ---------------------------------------------------
+            # SAVE UPDATED DATA
+            # ---------------------------------------------------
 
             save_students(df)
 
-            st.success("Student Removed Successfully ✅")
+            st.success(
+                "Student Removed Successfully ✅"
+            )
 
             st.rerun()
 
@@ -246,21 +333,23 @@ def student_management_page():
 
             st.error("Student ID Not Found")
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("---")
 
     # ===================================================
-    # STUDENT SEARCH
+    # SEARCH STUDENT
     # ===================================================
-
-    st.markdown("<div class='section-box'>", unsafe_allow_html=True)
 
     st.subheader("🔍 Search Student")
 
-    search_id = st.text_input("Enter Student ID")
+    search_id = st.text_input(
+        "Enter Student ID"
+    )
 
     if search_id:
 
-        result = df[df["Student_ID"].astype(str) == search_id]
+        result = df[
+            df["Student_ID"].astype(str) == search_id
+        ]
 
         if result.empty:
 
@@ -274,39 +363,41 @@ def student_management_page():
                 hide_index=True
             )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("---")
 
     # ===================================================
     # ALL STUDENTS
     # ===================================================
 
-    st.markdown("<div class='section-box'>", unsafe_allow_html=True)
-
     st.subheader("📋 All Students")
 
     st.dataframe(
+
         df,
+
         use_container_width=True,
         hide_index=True
+
     )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("---")
 
     # ===================================================
     # DOWNLOAD
     # ===================================================
-
-    st.markdown("<div class='section-box'>", unsafe_allow_html=True)
 
     st.subheader("📥 Download Student Data")
 
     csv = df.to_csv(index=False).encode("utf-8")
 
     st.download_button(
-        "⬇ Download CSV",
-        csv,
-        "students.csv",
-        "text/csv"
-    )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        "⬇ Download CSV",
+
+        csv,
+
+        "students.csv",
+
+        "text/csv"
+
+    )
