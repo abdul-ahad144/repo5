@@ -6,32 +6,38 @@ from utils.metrics import interview_success_rate, round_efficiency
 
 def dashboard():
 
-    st.title("🚀 PragyanAI Placement Intelligence Engine")
+    st.title("PragyanAI Placement Intelligence Engine")
 
     # ---------------------------------------------------
-    # LOAD DATA
+    # LOAD SAME CSV
     # ---------------------------------------------------
 
     @st.cache_data
     def load_data():
 
-        url = "https://raw.githubusercontent.com/pragyanaischool/VTU_Internship_DataSets/refs/heads/main/student_data_placement_interview_funnel_analysis_project_10.csv"
+        if not os.path.exists("students.csv"):
 
-        try:
-            df = pd.read_csv(url)
+            df = pd.DataFrame()
 
-        except:
-            df = pd.read_csv(
-                url,
-                encoding='latin1',
-                on_bad_lines='skip'
-            )
+        else:
+
+            df = pd.read_csv("students.csv")
 
         return df
 
+    import os
+
     df = load_data()
 
-    df.columns = df.columns.str.strip()
+    # ---------------------------------------------------
+    # EMPTY DATA CHECK
+    # ---------------------------------------------------
+
+    if df.empty:
+
+        st.warning("No student data available")
+
+        return
 
     # ---------------------------------------------------
     # SIDEBAR
@@ -72,7 +78,7 @@ def dashboard():
             df = df[df["Job_Role"].isin(role)]
 
     # ---------------------------------------------------
-    # RESET FILTERS
+    # RESET
     # ---------------------------------------------------
 
     if st.sidebar.button("Reset Filters"):
@@ -117,7 +123,10 @@ def dashboard():
 
     col1, col2, col3, col4 = st.columns(4)
 
-    col1.metric("Students", len(df))
+    col1.metric(
+        "Students",
+        len(df)
+    )
 
     col2.metric(
         "Success Rate",
@@ -131,7 +140,7 @@ def dashboard():
 
     col4.metric(
         "Placed",
-        df["Joined"].sum()
+        int(df["Joined"].sum())
     )
 
     # ---------------------------------------------------
@@ -139,10 +148,12 @@ def dashboard():
     # ---------------------------------------------------
 
     tab1, tab2, tab3, tab4 = st.tabs([
+
         "📉 Funnel",
         "🔥 Failures",
         "💼 Roles & Salary",
         "🧠 Skills"
+
     ])
 
     # ---------------------------------------------------
@@ -155,11 +166,11 @@ def dashboard():
 
         funnel_data = {
 
-            "Applied": df["Applied"].sum(),
-            "Shortlisted": df["Shortlisted"].sum(),
-            "Interview": df["Interview_Attended"].sum(),
-            "Offer": df["Offer_Received"].sum(),
-            "Joined": df["Joined"].sum()
+            "Applied": int(df["Applied"].sum()),
+            "Shortlisted": int(df["Shortlisted"].sum()),
+            "Interview": int(df["Interview_Attended"].sum()),
+            "Offer": int(df["Offer_Received"].sum()),
+            "Joined": int(df["Joined"].sum())
 
         }
 
@@ -185,7 +196,9 @@ def dashboard():
 
         st.subheader("📊 Job Roles vs Placement")
 
-        role_data = df.groupby("Job_Role")["Joined"].sum()
+        role_data = df.groupby(
+            "Job_Role"
+        )["Joined"].sum()
 
         st.bar_chart(role_data)
 
@@ -195,7 +208,10 @@ def dashboard():
 
         fig, ax = plt.subplots()
 
-        ax.hist(df["Salary_LPA"], bins=30)
+        ax.hist(
+            df["Salary_LPA"],
+            bins=10
+        )
 
         ax.set_title("Salary Distribution")
 
@@ -213,50 +229,11 @@ def dashboard():
 
         st.subheader("🧠 Skills Impact")
 
-        if "Skill_Programs" in df.columns:
+        skill_data = df.groupby(
+            "Skill_Programs"
+        )["Joined"].mean()
 
-            skill_data = df.groupby(
-                "Skill_Programs"
-            )["Joined"].mean()
-
-            st.bar_chart(skill_data)
-
-        if "Internships" in df.columns:
-
-            intern_data = df.groupby(
-                "Internships"
-            )["Joined"].mean()
-
-            st.bar_chart(intern_data)
-
-        if "Projects" in df.columns:
-
-            project_data = df.groupby(
-                "Projects"
-            )["Joined"].mean()
-
-            st.bar_chart(project_data)
-
-    # ---------------------------------------------------
-    # PROBABILITY CALCULATOR
-    # ---------------------------------------------------
-
-    st.markdown("## 🎯 Placement Probability Calculator")
-
-    cgpa = st.slider("CGPA", 0.0, 10.0, 7.0)
-
-    skills = st.slider("Skill Programs", 0, 5, 2)
-
-    projects = st.slider("Projects", 0, 10, 3)
-
-    internships = st.slider("Internships", 0, 5, 1)
-
-    prob = (cgpa + skills + projects + internships) / 25
-
-    st.metric(
-        "Estimated Probability",
-        f"{prob:.2%}"
-    )
+        st.bar_chart(skill_data)
 
     # ---------------------------------------------------
     # SEARCH
@@ -268,31 +245,15 @@ def dashboard():
 
     if sid:
 
-        result = df[df["Student_ID"].astype(str) == sid]
-
-        result = result.drop(
-            columns=["Failed_Stage"],
-            errors="ignore"
-        )
+        result = df[
+            df["Student_ID"].astype(str) == sid
+        ]
 
         st.dataframe(
             result,
-            hide_index=True
+            hide_index=True,
+            use_container_width=True
         )
-
-    # ---------------------------------------------------
-    # DOWNLOAD
-    # ---------------------------------------------------
-
-    st.subheader("📥 Download Data")
-
-    csv = df.to_csv(index=False).encode('utf-8')
-
-    st.download_button(
-        "Download CSV",
-        csv,
-        "data.csv"
-    )
 
     # ---------------------------------------------------
     # TOP STUDENTS
@@ -305,27 +266,25 @@ def dashboard():
         ascending=False
     ).head(10)
 
-    top = top.drop(
-        columns=["Failed_Stage"],
-        errors="ignore"
-    )
-
     st.dataframe(
         top,
-        hide_index=True
+        hide_index=True,
+        use_container_width=True
     )
 
     # ---------------------------------------------------
-    # INSIGHTS
+    # DOWNLOAD
     # ---------------------------------------------------
 
-    st.subheader("📌 Insights")
+    st.subheader("📥 Download Data")
 
-    st.write("Interview stage biggest bottleneck")
+    csv = df.to_csv(index=False).encode("utf-8")
 
-    st.write("Coding + Tech failures high")
-
-    st.write("Projects + internships boost success")
+    st.download_button(
+        "Download CSV",
+        csv,
+        "students.csv"
+    )
 
     st.markdown("---")
 
