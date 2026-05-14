@@ -1,15 +1,20 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from utils.metrics import interview_success_rate, round_efficiency
+import os
+
+from utils.metrics import (
+    interview_success_rate,
+    round_efficiency
+)
 
 
 def dashboard():
 
-    st.title("PragyanAI Placement Intelligence Engine")
+    st.title("🚀 PragyanAI Placement Intelligence Engine")
 
     # ---------------------------------------------------
-    # LOAD SAME CSV
+    # LOAD SAME CSV USED BY STUDENT MANAGEMENT
     # ---------------------------------------------------
 
     @st.cache_data
@@ -24,8 +29,6 @@ def dashboard():
             df = pd.read_csv("students.csv")
 
         return df
-
-    import os
 
     df = load_data()
 
@@ -78,7 +81,7 @@ def dashboard():
             df = df[df["Job_Role"].isin(role)]
 
     # ---------------------------------------------------
-    # RESET
+    # RESET FILTERS
     # ---------------------------------------------------
 
     if st.sidebar.button("Reset Filters"):
@@ -116,7 +119,7 @@ def dashboard():
         st.rerun()
 
     # ---------------------------------------------------
-    # KPIs
+    # KPI SECTION
     # ---------------------------------------------------
 
     st.subheader("📊 Overview")
@@ -236,7 +239,7 @@ def dashboard():
         st.bar_chart(skill_data)
 
     # ---------------------------------------------------
-    # SEARCH
+    # SEARCH STUDENT
     # ---------------------------------------------------
 
     st.subheader("🔍 Student Search")
