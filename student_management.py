@@ -15,8 +15,6 @@ FILE = "students.csv"
 
 def load_students():
 
-    # CREATE FILE IF NOT EXISTS
-
     if not os.path.exists(FILE):
 
         df = pd.DataFrame(columns=[
@@ -270,18 +268,14 @@ def student_management_page():
 
             }])
 
-            # ---------------------------------------------------
-            # ADD TO SAME CSV
-            # ---------------------------------------------------
+            # ADD NEW STUDENT
 
             df = pd.concat(
                 [df, new_student],
                 ignore_index=True
             )
 
-            # ---------------------------------------------------
-            # SAVE
-            # ---------------------------------------------------
+            # SAVE TO SAME CSV
 
             save_students(df)
 
@@ -309,17 +303,13 @@ def student_management_page():
 
         if remove_id in df["Student_ID"].astype(str).values:
 
-            # ---------------------------------------------------
-            # REMOVE
-            # ---------------------------------------------------
+            # REMOVE STUDENT
 
             df = df[
                 df["Student_ID"].astype(str) != remove_id
             ]
 
-            # ---------------------------------------------------
-            # SAVE UPDATED DATA
-            # ---------------------------------------------------
+            # SAVE UPDATED CSV
 
             save_students(df)
 
@@ -383,7 +373,7 @@ def student_management_page():
     st.markdown("---")
 
     # ===================================================
-    # DOWNLOAD
+    # DOWNLOAD CSV
     # ===================================================
 
     st.subheader("📥 Download Student Data")
